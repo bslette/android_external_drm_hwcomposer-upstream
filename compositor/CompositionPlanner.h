@@ -109,12 +109,19 @@ class CompositionPlanner {
       return false;
     }
 
+    // An unset colorspace (dataspace UNKNOWN) is composed as BT.709 (see
+    // ToColorGamut()), so it does not differ from an explicit BT.709 one.
     auto get_colorspace = [](const auto& item) {
-      if constexpr (std::is_pointer_v<std::decay_t<decltype(item)>>) {
-        return item->GetLayerData().colorspace;
-      } else {
-        return item.layer->GetLayerData().colorspace;
-      }
+      const auto& data = [&]() -> const auto& {
+        if constexpr (std::is_pointer_v<std::decay_t<decltype(item)>>) {
+          return item->GetLayerData();
+        } else {
+          return item.layer->GetLayerData();
+        }
+      }();
+      using Colorspace = decltype(data.colorspace);
+      return data.colorspace == Colorspace::kDefault ? Colorspace::kBt709
+                                                     : data.colorspace;
     };
 
     const auto colorspace = get_colorspace(layers.front());
