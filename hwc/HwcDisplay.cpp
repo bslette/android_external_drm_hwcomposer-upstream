@@ -1600,6 +1600,21 @@ size_t HwcDisplay::GetNumAvailablePlanes() const {
   return pipeline_->GetUsablePlanes().first.size();
 }
 
+bool HwcDisplay::AnyPlaneSupportsLayer(const HwcLayer &layer) const {
+  const auto &data = layer.GetLayerData();
+  if (!data.bi) {
+    return false;
+  }
+  const auto [planes, cursor] = pipeline_->GetUsablePlanes();
+  if (cursor && layer.GetSfType() == CompositionType::kCursor &&
+      cursor->Get()->IsValidForLayer(&data)) {
+    return true;
+  }
+  return std::any_of(planes.begin(), planes.end(), [&](const auto &plane) {
+    return plane->Get()->IsValidForLayer(&data);
+  });
+}
+
 std::shared_ptr<BindingOwner<DrmPlane>> HwcDisplay::GetCursorPlane() const {
   return pipeline_->GetUsablePlanes().second;
 }

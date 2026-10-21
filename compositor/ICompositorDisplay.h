@@ -48,6 +48,11 @@ class ICompositorDisplay {
   virtual const FlatteningController *GetFlatCon() const = 0;
 
   virtual size_t GetNumAvailablePlanes() const = 0;
+  // Whether some usable plane can show |layer| as it is (format, alpha,
+  // blending, rotation). A layer no plane takes has to be client composited.
+  virtual bool AnyPlaneSupportsLayer(const HwcLayer & /*layer*/) const {
+    return true;
+  }
   virtual std::shared_ptr<BindingOwner<DrmPlane>> GetCursorPlane() const = 0;
 
   virtual CommitStatus TestComposition(

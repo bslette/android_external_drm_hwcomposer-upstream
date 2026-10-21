@@ -171,7 +171,8 @@ std::tuple<size_t, size_t> GenericCompositionPlanner::GetClientLayers(
 bool GenericCompositionPlanner::IsClientLayer(const ICompositorDisplay* display,
                                               const HwcLayer* layer) {
   return !HardwareSupportsLayerType(layer->GetSfType()) ||
-         !layer->IsLayerUsableAsDevice() || display->CtmByGpu() ||
+         !layer->IsLayerUsableAsDevice() ||
+         !display->AnyPlaneSupportsLayer(*layer) || display->CtmByGpu() ||
          (layer->GetLayerData().pi.RequireScalingOrPhasing() &&
           display->ForcedScalingWithGpu());
 }
